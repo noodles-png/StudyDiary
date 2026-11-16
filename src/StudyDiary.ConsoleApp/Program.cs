@@ -1,4 +1,8 @@
 ﻿using StudyDiary.Core.Models;
+using StudyDiary.Core.Services;
+
+IEntryManager testManager = new InMemoryEntryManager();
+
 
 var study = new Study
 {
@@ -26,7 +30,8 @@ var study = new Study
     ],
 };
 
-var entry = new Entry
+
+var entry1 = new Entry
 {
     Answers =
     [
@@ -43,23 +48,60 @@ var entry = new Entry
     StudyCode = study.Code
 };
 
-Console.WriteLine($"Eintrag {entry.Id} vom {entry.EntryTime:dd.MM.yyyy HH:mm}");
-
-foreach (var answer in entry.Answers)
+var entry2 = new Entry
 {
-    var question = study.Questions.FirstOrDefault(q => q.Id == answer.QuestionId);
+    Answers =
+    [
+        new Answer { QuestionId = 1, Value = "4" },
+        new Answer { QuestionId = 2, Value = "true" },
+        new Answer { QuestionId = 3, Value = "false" },
+        new Answer { QuestionId = 4, Value = "false" },
+        new Answer { QuestionId = 5, Value = "TestManager" }
+    ],
+
+    EntryTime = DateTimeOffset.Now,
+    ParticipantCode = "Tester1",
+    ProductId = 1,
+    StudyCode = study.Code
+};
 
 
-    // Question? question = null;
-    // foreach (var q in study.Questions)
-    // {
-    //     if (q.Id == answer.QuestionId)
-    //     {
-    //         question = q;
-    //         break;
-    //     }
-    // }
 
-    string text = question?.Text ?? "(unbekannte Frage)";
-    Console.WriteLine($"{text}: {answer.Value}");
+// Test - Save
+testManager.Save(entry1);
+testManager.Save(entry2);
+
+// Test - Update
+entry2.Answers[0].Value = "5";
+testManager.Save(entry2);
+Console.WriteLine(testManager.ReadAll().Count);
+Console.WriteLine(testManager.Delete(Guid.NewGuid()));
+
+// Test - ReadAll
+PrintEntries(testManager, study);
+
+// Test - Delete
+
+if (testManager.Delete(entry1.Id))
+{
+    Console.WriteLine("Gelöscht");
+}
+
+PrintEntries(testManager, study);
+
+
+
+void PrintEntries(IEntryManager manager, Study study)
+{
+    foreach (var entry in manager.ReadAll())
+    {
+        Console.WriteLine($"Eintrag {entry.Id} vom {entry.EntryTime:dd.MM.yyyy HH:mm}");
+
+        foreach (var answer in entry.Answers)
+        {
+            var question = study.Questions.FirstOrDefault(q => q.Id == answer.QuestionId);
+            string text = question?.Text ?? "(unbekannte Frage)";
+            Console.WriteLine($"{text}: {answer.Value}");
+        }
+    }
 }

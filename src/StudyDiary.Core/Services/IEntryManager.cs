@@ -1,6 +1,6 @@
 ﻿using StudyDiary.Core.Models;
 
-namespace StudyDiary.Core.Interfaces;
+namespace StudyDiary.Core.Services;
 
 public interface IEntryManager
 {

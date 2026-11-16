@@ -1,8 +1,6 @@
-﻿using System.Data;
-using System.Linq;
-using StudyDiary.Core.Models;
+﻿using StudyDiary.Core.Models;
 
-namespace StudyDiary.Core.Interfaces;
+namespace StudyDiary.Core.Services;
 
 public class InMemoryEntryManager : IEntryManager
 {
@@ -27,7 +25,9 @@ public class InMemoryEntryManager : IEntryManager
 
     public IReadOnlyList<Entry> ReadAll()
     {
-        return _entries.AsReadOnly();
+        return _entries
+            .OrderBy(e => e.EntryTime)
+            .ToList();
     }
 
     public Entry? ReadById(Guid id)
@@ -38,7 +38,10 @@ public class InMemoryEntryManager : IEntryManager
 
     public IReadOnlyList<Entry> ReadByProduct(int productId)
     {
-        throw new NotImplementedException();
+        return _entries
+            .Where(e => e.ProductId == productId)
+            .OrderBy(e => e.EntryTime)
+            .ToList();
     }
 
     public bool Delete(Guid id)
